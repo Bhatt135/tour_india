@@ -1,0 +1,25 @@
+
+business
+	sb-qjwdp39754866@business.example.com
+	8Hg@r)Mk
+	https://sandbox.paypal.com
+	c id - Ae5_qV9Dtzme9AHkploxs4T8BcLr-TSdvAdbB6VYgMLWDVASHBswc3-rtSOcBwGmPPUp4ku-zYV-sf6B
+	s id- EH5C_eRzs13LwrZj2Ruw-Hc9NzrxnWL5tfpdF00XnRksHoDC-EOA2p4Og2kGnG4ynueM4f1Mzwuuz-DJ
+
+	personal
+	sb-yuszr39765540@personal.example.com
+	!_F2YkKt
+
+	i want u to email user when is payment is successful
+email should be same everytime
+"Dear tour member,
+Your journey is confirmed.
+Tour-india welcomes u to the world of limitless enjoyment and happiness."
+help me
+
+user@gmail.com
+1234
+
+stripe
+publuish key pk_test_51RBUi7B0Pd8uVfnlkaRNvYCgjW8OUvZkPec9BdtXwsyLVSXvFeP8zpWdHIg3PKA5gQiVMttFa3nc3nWkz6fxdKVa00FIp4nQO0
+secret key sk_test_51RBUi7B0Pd8uVfnlKBVII6s1cixxtQ0n03VaRKSt2NgVSYsZWcEbcrr9i9QOyDm1qfiP8NafWKnIyRCFguTXE4ST00NeTTplmv

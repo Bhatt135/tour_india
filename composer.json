@@ -1,0 +1,18 @@
+{
+    "name": "prath/tour-india-backend",
+    "autoload": {
+        "psr-4": {
+            "Prath\\TourIndiaBackend\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Pratham",
+            "email": "prathambhatt987@gmail.com"
+        }
+    ],
+    "require": {
+        "stripe/stripe-php": "^17.1",
+        "phpmailer/phpmailer": "^6.9"
+    }
+}
