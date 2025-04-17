@@ -42,7 +42,7 @@
             <div class="header-content">
                 <h1>Daman : Chill with friends</h1>
                 <div class="line"></div>
-                <a href="#about" class="ctn">Learn more</a>
+                <a href="login.php?tour_id=4" class="ctn">Book now</a>
             </div>
         </header>
 

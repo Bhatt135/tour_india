@@ -42,8 +42,8 @@
             <div class="header-content">
                 <h1>Goa : filled with refreshment</h1>
                 <div class="line"></div>
-                <a href="#about" class="ctn">Learn more</a>
-            </div>
+                <a href="login.php?tour_id=2" class="ctn">Book now</a>
+                </div>
         </header>
         <!-- End of Header Section -->
         <!-- Main Content -->

@@ -23,3 +23,7 @@ user@gmail.com
 stripe
 publuish key pk_test_51RBUi7B0Pd8uVfnlkaRNvYCgjW8OUvZkPec9BdtXwsyLVSXvFeP8zpWdHIg3PKA5gQiVMttFa3nc3nWkz6fxdKVa00FIp4nQO0
 secret key sk_test_51RBUi7B0Pd8uVfnlKBVII6s1cixxtQ0n03VaRKSt2NgVSYsZWcEbcrr9i9QOyDm1qfiP8NafWKnIyRCFguTXE4ST00NeTTplmv
+
+infinity free
+username if0_38752215
+pwd Pab150804

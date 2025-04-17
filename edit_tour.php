@@ -1,35 +1,74 @@
 <?php
-$conn = new mysqli("localhost", "root", "", "tour_india");
+include("connection.php");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = $_POST['name'];
-    $cost = $_POST['cost'];
-    $plan = $_POST['plan'];
-
-    $query = "UPDATE tour_plans SET estimated_cost='$cost', tour_plan='$plan' WHERE place_name='$name'";
-    $conn->query($query);
-
-    header("Location: admin_dashboard.php");
-    exit();
+    // Use prepared statements to prevent SQL injection
+    $stmt = $conn->prepare("UPDATE tour_plans SET estimated_cost=?, tour_plan=? WHERE id=?");
+    $stmt->bind_param("ssi", $_POST['cost'], $_POST['plan'], $_POST['id']);
+    
+    if ($stmt->execute()) {
+        header("Location: admin_dashboard.php");
+        exit();
+    } else {
+        die("Error updating tour: " . $stmt->error);
+    }
 }
 
-$name = $_GET['id'];
-$tour = $conn->query("SELECT * FROM tour_plans WHERE place_name='$name'")->fetch_assoc();
+// Get the tour name from URL parameter
+$name = $_GET['id'] ?? null;
+
+if (!$name) {
+    die("No tour specified");
+}
+
+// Fetch tour data with prepared statement
+$stmt = $conn->prepare("SELECT * FROM tour_plans WHERE id=?");
+$stmt->bind_param("s", $name);
+$stmt->execute();
+$result = $stmt->get_result();
+$tour = $result->fetch_assoc();
+
+if (!$tour) {
+    die("Tour not found");
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Edit Tour</title>
+    <style>
+        form {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0 15px;
+        }
+    </style>
 </head>
 <body>
     <form method="POST">
-        <input type="hidden" name="name" value="<?= $tour['place_name'] ?>">
-        Estimated Cost: <input type="number" name="cost" value="<?= $tour['estimated_cost'] ?>"><br>
-        Tour Plan: <textarea name="plan"><?= $tour['tour_plan'] ?></textarea><br>
-        <button type="submit">Update</button>
+        <input type="hidden" name="id" value="<?= htmlspecialchars($tour['id']) ?>">
+        <label>
+            Estimated Cost:
+            <input type="number" name="cost" value="<?= htmlspecialchars($tour['estimated_cost']) ?>">
+        </label><br>
+        <label>
+            Tour Plan:
+            <textarea name="plan"><?= htmlspecialchars($tour['tour_plan']) ?></textarea>
+        </label><br>
+        <button type="submit">Update Tour</button>
     </form>
-    
 </body>
 </html>

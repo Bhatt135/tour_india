@@ -8,10 +8,8 @@ if (!isset($_SESSION['id'])) {
 }
 
 // Database connection
-$conn = new mysqli("localhost", "root", "", "tour_india");
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+include("connection.php");
+
 
 // Get user details
 $user_id = $_SESSION['id'];
@@ -74,7 +72,7 @@ $conn->close();
         <div class="card mb-3">
             <div class="card-header bg-secondary text-white">Tour Info</div>
             <div class="card-body">
-                <p><strong>Destination:</strong> <?= htmlspecialchars($tour['place_name']) ?></p>
+                <p><strong>Destination:</strong> <?= htmlspecialchars($tour['destination']) ?></p>
                 <p><strong>Cost:</strong> ₹<?= number_format($tour['estimated_cost']) ?></p>
                 <p><strong>Plan:</strong> <?= nl2br(htmlspecialchars($tour['tour_plan'])) ?></p>
                 <?php if ($booking_status): ?>
@@ -89,7 +87,7 @@ $conn->close();
         <form id="payment-form" method="POST" action="stripe_payment.php">
             <input type="hidden" name="email" value="<?= htmlspecialchars($user['email']) ?>">
             <input type="hidden" name="holdername" value="<?= htmlspecialchars($user['name']) ?>">
-            <input type="hidden" name="destination" value="<?= htmlspecialchars($tour['place_name']) ?>">
+            <input type="hidden" name="destination" value="<?= htmlspecialchars($tour['destination']) ?>">
             <input type="hidden" name="cost" value="<?= $tour['estimated_cost'] ?>">
 
             <div class="mb-3">
@@ -124,7 +122,6 @@ $conn->close();
             hiddenInput.setAttribute("name", "stripeToken");
             hiddenInput.setAttribute("value", token.id);
             paymentForm.appendChild(hiddenInput);
-
             paymentForm.submit(); // ✅ Working submit
         }
     });

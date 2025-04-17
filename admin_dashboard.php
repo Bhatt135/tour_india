@@ -5,16 +5,16 @@ session_start();
 //     exit();
 // }
 
-$conn = new mysqli("localhost", "root", "", "tour_india");
+include("connection.php");
 
 // Handle form submission for adding new tour
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['add_tour'])) {
-        $place_name = $conn->real_escape_string($_POST['place_name']);
+        $destination = $conn->real_escape_string($_POST['destination']);
         $estimated_cost = $conn->real_escape_string($_POST['estimated_cost']);
         $tour_plan = $conn->real_escape_string($_POST['tour_plan']);
         
-        $sql = "INSERT INTO tour_plans (place_name, estimated_cost, tour_plan) VALUES ('$place_name', '$estimated_cost', '$tour_plan')";
+        $sql = "INSERT INTO tour_plans (destination, estimated_cost, tour_plan) VALUES ('$destination', '$estimated_cost', '$tour_plan')";
         if ($conn->query($sql)) {
             header("Location: admin_dashboard.php");
             exit();
@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 // Fetch data
-$tours = $conn->query("SELECT * FROM tour_plans");
+$tours = $conn->query("SELECT * FROM tour_plans ORDER BY id ASC");
 $users = $conn->query("SELECT * FROM users");
 $registrations = $conn->query("SELECT * FROM registration");
 ?>
@@ -75,8 +75,8 @@ $registrations = $conn->query("SELECT * FROM registration");
                 <?php endif; ?>
                 <form method="POST" action="">
                     <div class="mb-3">
-                        <label for="place_name" class="form-label">Place Name</label>
-                        <input type="text" class="form-control" id="place_name" name="place_name" required>
+                        <label for="destination" class="form-label">Place Name</label>
+                        <input type="text" class="form-control" id="destination" name="destination" required>
                     </div>
                     <div class="mb-3">
                         <label for="estimated_cost" class="form-label">Estimated Cost (₹)</label>
@@ -109,12 +109,12 @@ $registrations = $conn->query("SELECT * FROM registration");
                     <tbody>
                         <?php while ($row = $tours->fetch_assoc()): ?>
                             <tr>
-                                <td><?= htmlspecialchars($row['place_name']) ?></td>
+                                <td><?= htmlspecialchars($row['destination']) ?></td>
                                 <td>₹<?= number_format($row['estimated_cost']) ?></td>
                                 <td><?= nl2br(htmlspecialchars($row['tour_plan'])) ?></td>
                                 <td class="text-center">
-                                    <a href="edit_tour.php?id=<?= $row['place_name'] ?>" class="btn btn-primary btn-sm">Edit</a>
-                                    <a href="delete_tour.php?id=<?= $row['place_name'] ?>" 
+                                    <a href="edit_tour.php?id=<?= $row['id'] ?>" class="btn btn-primary btn-sm">Edit</a>
+                                    <a href="delete_tour.php?id=<?= $row['id'] ?>" 
                                        onclick="return confirm('Delete this tour?')" 
                                        class="btn btn-danger btn-sm">Delete</a>
                                 </td>

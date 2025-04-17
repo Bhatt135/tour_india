@@ -2,12 +2,8 @@
 session_start();
 
 // Database connection
-$conn = new mysqli("localhost", "root", "", "tour_india");
+include("connection.php");
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
 
 // Store tour_id if coming from tour selection
 if (isset($_GET['tour_id'])) {

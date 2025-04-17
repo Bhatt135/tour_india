@@ -1,5 +1,5 @@
 <?php
-$conn = new mysqli("localhost", "root", "", "tour_india");
+include("connection.php");
 $id = $_GET['id'];
 
 $conn->query("DELETE FROM users WHERE id='$id'");

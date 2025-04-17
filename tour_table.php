@@ -36,19 +36,8 @@
 
     <!-- Main Content Wrapper -->
     <?php
-// Database connection details
-$servername = "localhost";
-$username = "root"; // Change if using custom user
-$password = "";     // Add password if applicable
-$dbname = "tour_india";
+include("connection.php");
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
 
 // Query to fetch all tour plans
 $sql = "SELECT * FROM tour_plans";
@@ -99,7 +88,7 @@ $result = $conn->query($sql);
     <tr>
         <th>SR NO.</th>
         <th>Place Name</th>
-        <th>Estimated Cost (INR)</th>
+        <th>Cost (INR)</th>
         <th>Tour Plan</th>
         <th>Let's Go</th>
     </tr>
@@ -109,12 +98,12 @@ $result = $conn->query($sql);
     $n1 = 1;
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
-            $modalId = "viewmodal_" . $row['place_name']; // Unique modal ID
+            $modalId = "viewmodal_" . $row['destination']; // Unique modal ID
             ?>
 
             <tr>
                 <td><?= $n1; ?></td>
-                <td><?= htmlspecialchars($row["place_name"]); ?></td>
+                <td><?= htmlspecialchars($row["destination"]); ?></td>
                 <td>₹<?= number_format($row["estimated_cost"]); ?></td>
                 <td><pre><?= htmlspecialchars($row["tour_plan"]); ?></pre></td>
                 <td>

@@ -115,7 +115,7 @@
  <section class="events" id="events">
   <div class="container">
    <div class="title">
-    <h1 class="dark">Feel the Waves, Embrace the Sun! 🌊☀️</h1>
+    <h1 class="dark">Book our upcoming events at dicounted price🌊☀️</h1>
     <div class="line"></div>
    </div>
    <div class="row">
@@ -179,7 +179,7 @@
     “Traveling – it leaves you speechless, then turns you into a storyteller.” – Ibn Battuta 
     <br />
     <br />
-    Create your own tour with us and make your own story.
+    Choose your own tour with us and make your own story.
   </p>
    <a href="tour_table.php" target="_blank" class="ctn">Let's go</a>
    </div>

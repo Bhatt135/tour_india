@@ -41,33 +41,11 @@
                 <h1>Diu : filled with refreshment</h1>
                 <div class="line"></div>
                 <!-- <button onclick="triggerCustomPayload()" class="ctn">Make a plan</button> -->
-                
+                <!--  -->
     <script src="https://cdn.botpress.cloud/webchat/v2.2/inject.js"></script>
     <script src="https://files.bpcontent.cloud/2025/03/04/09/20250304095305-F4CIKGZ8.js"></script>
-    <button id="sendMessageBtn" class="ctn">Send Custom Message</button>
-    <script>
-        // Wait for Botpress to load
-        window.botpressWebChat.onEvent(
-          function (event) {
-            if (event.type === 'LIFECYCLE.LOADED') {
-              const button = document.getElementById('sendMessageBtn');
-              button.addEventListener('click', async function () {
-                console.log('Sending custom message...');
-                
-                // Open chat window
-                window.botpressWebChat.sendEvent({ type: 'show' });
-      
-                // Send message directly as if typed by user
-                await window.botpressWebChat.sendMessage('Hello');
-              });
-            }
-          },
-          ['LIFECYCLE.LOADED']
-        );
-      </script>
-      
-
-                
+    <a href="login.php?tour_id=12" class="ctn">Book now</a>
+                    
             </div>
         </header>
 

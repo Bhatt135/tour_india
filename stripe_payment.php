@@ -7,10 +7,8 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 // Database connection
-$conn = new mysqli("localhost", "root", "", "tour_india");
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+include("connection.php");
+
 
 // Stripe Secret Key
 \Stripe\Stripe::setApiKey('sk_test_51RBUi7B0Pd8uVfnlKBVII6s1cixxtQ0n03VaRKSt2NgVSYsZWcEbcrr9i9QOyDm1qfiP8NafWKnIyRCFguTXE4ST00NeTTplmv');
@@ -20,6 +18,7 @@ if ($conn->connect_error) {
 $statusMsg = 'Error on form submission.';
 $ordStatus = 'error';
 $transactionID = $paidAmount = $paidCurrency = $payment_status = $destination = $price = $currency = '';
+$tourPlan = ''; // Initialize tour plan variable
 
 // Process payment
 if (!empty($_POST['stripeToken']) && !empty($_POST['email']) && !empty($_POST['holdername']) && !empty($_POST['destination']) && !empty($_POST['cost'])) {
@@ -31,6 +30,17 @@ if (!empty($_POST['stripeToken']) && !empty($_POST['email']) && !empty($_POST['h
     $currency    = 'usd';
 
     try {
+        // Get tour plan from database
+        $stmt = $conn->prepare("SELECT tour_plan FROM tour_plans WHERE destination = ?");
+        $stmt->bind_param("s", $destination);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $tourPlan = $row['tour_plan'];
+        }
+        $stmt->close();
+
         // Create a Customer
         $customer = \Stripe\Customer::create([
             'email'       => $email,
@@ -119,6 +129,10 @@ if (!empty($_POST['stripeToken']) && !empty($_POST['email']) && !empty($_POST['h
                             <div style='background-color: #f0f8ff; padding: 15px; border-radius: 10px;'>
                                 <h3 style='color: #007bff;'>🧳 Tour Details</h3>
                                 <p><strong>Destination:</strong> " . htmlspecialchars($destination) . "</p>
+                                <p><strong>Tour Plan:</strong></p>
+                                <div style='background-color: #fff; padding: 10px; border-radius: 5px; margin-top: 10px;'>" . 
+                                    nl2br(htmlspecialchars($tourPlan)) . "
+                                </div>
                             </div>
 
                             <p style='margin-top: 20px;'>If you have any questions, reply to this email or contact our support team.</p>
@@ -127,23 +141,26 @@ if (!empty($_POST['stripeToken']) && !empty($_POST['email']) && !empty($_POST['h
                     ";
 
 
-            $mail->AltBody = "TOUR-INDIA Booking Confirmation
+                $mail->AltBody = "TOUR-INDIA Booking Confirmation
 
-            Hi $name,
+                Hi $name,
 
-            Thank you for booking with TOUR-INDIA. Your tour details are below:
+                Thank you for booking with TOUR-INDIA. Your tour details are below:
 
-            Transaction ID: $transactionID
-            Amount Paid: ₹" . number_format($price, 2) . "
-            Status: " . ucfirst($payment_status) . "
-            Date: $dt_tm
+                Transaction ID: $transactionID
+                Amount Paid: ₹" . number_format($price, 2) . "
+                Status: " . ucfirst($payment_status) . "
+                Date: $dt_tm
 
-            Destination: " . htmlspecialchars($destination) . "
+                Destination: " . htmlspecialchars($destination) . "
 
-            If you have any questions, reply to this email.
+                Tour Plan:
+                " . $tourPlan . "
 
-            Best regards,
-            TOUR-INDIA Team";
+                If you have any questions, reply to this email.
+
+                Best regards,
+                TOUR-INDIA Team";
 
 
                 $mail->send();
@@ -208,6 +225,15 @@ if (!empty($_POST['stripeToken']) && !empty($_POST['email']) && !empty($_POST['h
         .btn-continue:hover {
             background: #0056b3;
         }
+        
+        .tour-plan {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+            white-space: pre-line;
+        }
     </style>
 </head>
 
@@ -225,7 +251,9 @@ if (!empty($_POST['stripeToken']) && !empty($_POST['email']) && !empty($_POST['h
         <div style="background-color: #f0f8ff; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
             <h4 style="color: #007bff;">🧳 Tour Details</h4>
             <p><strong>Destination:</strong> <?php echo htmlspecialchars($destination); ?></p>
-            <p><strong>Booking Time:</strong> <?php echo $dt_tm; ?></p>
+            <p><strong>Tour Plan:</strong></p>
+            <div class="tour-plan"><?php echo nl2br(htmlspecialchars($tourPlan)); ?></div>
+            <p style="margin-top: 15px;"><strong>Booking Time:</strong> <?php echo $dt_tm; ?></p>
         </div>
 
         <div class="alert alert-success mt-3 text-center fw-bold">
