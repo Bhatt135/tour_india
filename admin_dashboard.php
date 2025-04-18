@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $destination = $conn->real_escape_string($_POST['destination']);
         $estimated_cost = $conn->real_escape_string($_POST['estimated_cost']);
         $tour_plan = $conn->real_escape_string($_POST['tour_plan']);
-        
+
         $sql = "INSERT INTO tour_plans (destination, estimated_cost, tour_plan) VALUES ('$destination', '$estimated_cost', '$tour_plan')";
         if ($conn->query($sql)) {
             header("Location: admin_dashboard.php");
@@ -21,11 +21,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         } else {
             $add_error = "Error adding tour: " . $conn->error;
         }
-    }
-    elseif (isset($_POST['update_role'])) {
+    } elseif (isset($_POST['update_role'])) {
         $user_id = $conn->real_escape_string($_POST['user_id']);
         $new_role = $conn->real_escape_string($_POST['new_role']);
-        
+
         $sql = "UPDATE users SET role = '$new_role' WHERE id = '$user_id'";
         if ($conn->query($sql)) {
             header("Location: admin_dashboard.php");
@@ -40,10 +39,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 $tours = $conn->query("SELECT * FROM tour_plans ORDER BY id ASC");
 $users = $conn->query("SELECT * FROM users");
 $registrations = $conn->query("SELECT * FROM registration");
+
+$tour_count = $conn->query("SELECT COUNT(*) as total FROM tour_plans")->fetch_assoc()['total'];
+$user_count = $conn->query("SELECT COUNT(*) as total FROM users")->fetch_assoc()['total'];
+$total_fees = $conn->query("SELECT SUM(fees) as total FROM registration")->fetch_assoc()['total'] ?? 0;
+
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -53,24 +58,59 @@ $registrations = $conn->query("SELECT * FROM registration");
         .section {
             margin-bottom: 3rem;
         }
+
         .card {
             margin-bottom: 2rem;
         }
+
         .role-form {
             display: inline-block;
             margin-left: 0.5rem;
         }
+
+        .display-6 {
+            font-size: 2rem;
+            font-weight: bold;
+        }
     </style>
 </head>
+
 <body>
     <div class="container py-4">
+        <div class="row text-center mb-4">
+            <div class="col-md-4">
+                <div class="card bg-success text-white shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Tours</h5>
+                        <p class="display-6"><?= $tour_count ?></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-info text-white shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Users</h5>
+                        <p class="display-6"><?= $user_count ?></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-warning text-dark shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Fees Collected</h5>
+                        <p class="display-6">₹<?= number_format($total_fees) ?></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Add Tour Form -->
         <div class="card">
             <div class="card-header bg-primary text-white">
                 <h4 class="text-center">Add New Tour</h4>
             </div>
             <div class="card-body">
-                <?php if (isset($add_error)): ?>
+                <?php if (isset($add_error)) : ?>
                     <div class="alert alert-danger"><?= $add_error ?></div>
                 <?php endif; ?>
                 <form method="POST" action="">
@@ -107,16 +147,14 @@ $registrations = $conn->query("SELECT * FROM registration");
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while ($row = $tours->fetch_assoc()): ?>
+                        <?php while ($row = $tours->fetch_assoc()) : ?>
                             <tr>
                                 <td><?= htmlspecialchars($row['destination']) ?></td>
                                 <td>₹<?= number_format($row['estimated_cost']) ?></td>
                                 <td><?= nl2br(htmlspecialchars($row['tour_plan'])) ?></td>
                                 <td class="text-center">
                                     <a href="edit_tour.php?id=<?= $row['id'] ?>" class="btn btn-primary btn-sm">Edit</a>
-                                    <a href="delete_tour.php?id=<?= $row['id'] ?>" 
-                                       onclick="return confirm('Delete this tour?')" 
-                                       class="btn btn-danger btn-sm">Delete</a>
+                                    <a href="delete_tour.php?id=<?= $row['id'] ?>" onclick="return confirm('Delete this tour?')" class="btn btn-danger btn-sm">Delete</a>
                                 </td>
                             </tr>
                         <?php endwhile; ?>
@@ -142,7 +180,7 @@ $registrations = $conn->query("SELECT * FROM registration");
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while ($row = $registrations->fetch_assoc()): ?>
+                        <?php while ($row = $registrations->fetch_assoc()) : ?>
                             <tr>
                                 <td><?= htmlspecialchars($row['id']) ?></td>
                                 <td><?= htmlspecialchars($row['name']) ?></td>
@@ -151,9 +189,7 @@ $registrations = $conn->query("SELECT * FROM registration");
                                 <td>₹<?= number_format($row['fees']) ?></td>
                                 <td><?= htmlspecialchars($row['status']) ?></td>
                                 <td class="text-center">
-                                    <a href="delete_registration.php?id=<?= $row['id'] ?>" 
-                                       onclick="return confirm('Delete this registration?')" 
-                                       class="btn btn-danger btn-sm">Delete</a>
+                                    <a href="delete_registration.php?id=<?= $row['id'] ?>" onclick="return confirm('Delete this registration?')" class="btn btn-danger btn-sm">Delete</a>
                                 </td>
                             </tr>
                         <?php endwhile; ?>
@@ -165,7 +201,7 @@ $registrations = $conn->query("SELECT * FROM registration");
         <!-- Users Section -->
         <div class="section">
             <h2 class="text-center mb-4">Manage Users</h2>
-            <?php if (isset($role_error)): ?>
+            <?php if (isset($role_error)) : ?>
                 <div class="alert alert-danger"><?= $role_error ?></div>
             <?php endif; ?>
             <div class="table-responsive">
@@ -178,7 +214,7 @@ $registrations = $conn->query("SELECT * FROM registration");
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while ($row = $users->fetch_assoc()): ?>
+                        <?php while ($row = $users->fetch_assoc()) : ?>
                             <tr>
                                 <td><?= htmlspecialchars($row['email']) ?></td>
                                 <td class="text-center"><?= htmlspecialchars($row['role']) ?></td>
@@ -191,9 +227,7 @@ $registrations = $conn->query("SELECT * FROM registration");
                                         </select>
                                         <button type="submit" name="update_role" class="btn btn-primary btn-sm">Update</button>
                                     </form>
-                                    <a href="delete_user.php?id=<?= $row['id'] ?>" 
-                                       onclick="return confirm('Delete this user?')" 
-                                       class="btn btn-danger btn-sm">Delete</a>
+                                    <a href="delete_user.php?id=<?= $row['id'] ?>" onclick="return confirm('Delete this user?')" class="btn btn-danger btn-sm">Delete</a>
                                 </td>
                             </tr>
                         <?php endwhile; ?>
@@ -205,4 +239,5 @@ $registrations = $conn->query("SELECT * FROM registration");
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
