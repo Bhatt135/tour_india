@@ -40,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     if (isset($_SESSION['selected_tour_id'])) {
                         header("Location: user_tour_details.php");
                     } else {
-                        header("Location: welcome.php");
+                        header("Location: tour_table.php");
                     }
                 }
                 exit;

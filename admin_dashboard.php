@@ -1,10 +1,4 @@
 <?php
-session_start();
-// if (!isset($_SESSION['admin'])) {
-//     header("Location: login.php");
-//     exit();
-// }
-
 include("connection.php");
 
 // Handle all form submissions
@@ -43,6 +37,18 @@ $registrations = $conn->query("SELECT * FROM registration");
 $tour_count = $conn->query("SELECT COUNT(*) as total FROM tour_plans")->fetch_assoc()['total'];
 $user_count = $conn->query("SELECT COUNT(*) as total FROM users")->fetch_assoc()['total'];
 $total_fees = $conn->query("SELECT SUM(fees) as total FROM registration")->fetch_assoc()['total'] ?? 0;
+
+// Get registration data for the chart
+$chart_data = $conn->query("SELECT DATE(added_date) as reg_date, SUM(fees) as daily_total 
+                           FROM registration 
+                           GROUP BY DATE(added_date) 
+                           ORDER BY added_date ASC");
+$labels = [];
+$data = [];
+while ($row = $chart_data->fetch_assoc()) {
+    $labels[] = date('M j', strtotime($row['reg_date']));
+    $data[] = $row['daily_total'];
+}
 ?>
 
 <!DOCTYPE html>
@@ -54,6 +60,50 @@ $total_fees = $conn->query("SELECT SUM(fees) as total FROM registration")->fetch
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+    body {
+        padding-left: 270px; /* Same as sidebar width */
+        background-color: #f8f9fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+    }
+    
+    /* Chart styling */
+.card-body canvas {
+    width: 100% !important;
+    height: 300px !important;
+}
+    .sidebar {
+        width: 250px;
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        background: #2c3e50;
+        color: white;
+        padding: 20px;
+        z-index: 1000;
+        overflow-y: auto;
+    }
+    
+    .dashboard-header {
+        position: relative;
+        width: 100%;
+        background-color: var(--secondary-color);
+        color: white;
+        padding: 1.5rem 0;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    /* Remove the margin-left from all container divs */
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding-right: 15px;
+        padding-left: 15px;
+        margin-right: auto;
+        margin-left: auto;
+    }
         :root {
             --primary-color: #3498db;
             --secondary-color: #2c3e50;
@@ -115,21 +165,48 @@ $total_fees = $conn->query("SELECT SUM(fees) as total FROM registration")->fetch
             background-color: var(--info-color);
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <!-- Sidebar -->
+<div class="sidebar">
+    <h4 class="text-center mb-4">Menu</h4>
+    <ul class="nav flex-column">
+        <li class="nav-item mb-2">
+            <button class="btn btn-primary w-100 text-start" data-bs-toggle="modal" data-bs-target="#toursModal">
+                <i class="bi bi-map me-2"></i> Manage Tours
+            </button>
+        </li>
+        <li class="nav-item mb-2">
+            <button class="btn btn-info w-100 text-start" data-bs-toggle="modal" data-bs-target="#registrationsModal">
+                <i class="bi bi-list-check me-2"></i> Manage Registrations
+            </button>
+        </li>
+        <li class="nav-item mb-2">
+            <button class="btn btn-secondary w-100 text-start" data-bs-toggle="modal" data-bs-target="#usersModal">
+                <i class="bi bi-people me-2"></i> Manage Users
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="btn btn-success w-100 text-start" data-bs-toggle="modal" data-bs-target="#addTourModal">
+                <i class="bi bi-plus-circle me-2"></i> Add New Tour
+            </button>
+        </li>
+    </ul>
+</div>
     <!-- Dashboard Header -->
-    <header class="dashboard-header">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h1><i class="bi bi-speedometer2"></i> Admin Dashboard</h1>
-                </div>
-                <div class="col-md-6 text-end">
-                    <a href="tour_table.php" class="btn btn-outline-light"><i class="bi bi-box-arrow-right"></i> Logout</a>
-                </div>
+<header class="dashboard-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1><i class="bi bi-speedometer2"></i> Admin Dashboard</h1>
+            </div>
+            <div class="col-md-6 text-end">
+                <a href="tour_table.php" class="btn btn-outline-light"><i class="bi bi-box-arrow-right"></i> Logout</a>
             </div>
         </div>
-    </header>
+    </div>
+</header>
 
     <div class="container">
         <!-- Statistics Cards -->
@@ -175,23 +252,15 @@ $total_fees = $conn->query("SELECT SUM(fees) as total FROM registration")->fetch
             </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="row mb-4 text-center">
-            <div class="col">
-                <button class="btn btn-primary action-btn" data-bs-toggle="modal" data-bs-target="#toursModal">
-                    <i class="bi bi-map"></i> Manage Tours
-                </button>
-                <button class="btn btn-info action-btn" data-bs-toggle="modal" data-bs-target="#registrationsModal">
-                    <i class="bi bi-list-check"></i> Manage Registrations
-                </button>
-                <button class="btn btn-secondary action-btn" data-bs-toggle="modal" data-bs-target="#usersModal">
-                    <i class="bi bi-people"></i> Manage Users
-                </button>
-                <button class="btn btn-success action-btn" data-bs-toggle="modal" data-bs-target="#addTourModal">
-                    <i class="bi bi-plus-circle"></i> Add New Tour
-                </button>
-            </div>
-        </div>
+        <!-- Registration Fees Graph -->
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="card-title"><i class="bi bi-bar-chart"></i> Registration Fees Over Time</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="feesChart" height="300"></canvas>
+    </div>
+</div>
 
         <!-- Tours Modal -->
         <div class="modal fade" id="toursModal" tabindex="-1" aria-labelledby="toursModalLabel" aria-hidden="true">
@@ -243,58 +312,64 @@ $total_fees = $conn->query("SELECT SUM(fees) as total FROM registration")->fetch
 
         <!-- Registrations Modal -->
         <div class="modal fade" id="registrationsModal" tabindex="-1" aria-labelledby="registrationsModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl">
-                <div class="modal-content">
-                    <div class="modal-header bg-info text-white">
-                        <h5 class="modal-title" id="registrationsModalLabel"><i class="bi bi-list-check"></i> Manage Registrations</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Destination</th>
-                                        <th>Fees</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php while ($row = $registrations->fetch_assoc()) : ?>
-                                        <tr>
-                                            <td><?= htmlspecialchars($row['id']) ?></td>
-                                            <td><?= htmlspecialchars($row['name']) ?></td>
-                                            <td><?= htmlspecialchars($row['email']) ?></td>
-                                            <td><?= htmlspecialchars($row['destination']) ?></td>
-                                            <td>₹<?= number_format($row['fees']) ?></td>
-                                            <td>
-                                                <span class="badge bg-<?= $row['status'] == 'paid' ? 'success' : 'warning' ?>">
-                                                    <?= htmlspecialchars($row['status']) ?>
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <a href="delete_registration.php?id=<?= $row['id'] ?>" 
-                                                   onclick="return confirm('Are you sure you want to delete this registration?')" 
-                                                   class="btn btn-sm btn-outline-danger">
-                                                    <i class="bi bi-trash"></i> Delete
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    <?php endwhile; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="registrationsModalLabel"><i class="bi bi-list-check"></i> Manage Registrations</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Destination</th>
+                                <th>Fees</th>
+                                <th>Status</th>
+                                <th>Date</th> <!-- Added Date column header -->
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php 
+                            $n = 1;
+                            while ($row = $registrations->fetch_assoc()) : ?>
+                                <tr>
+                                    <td><?= $n ?></td>
+                                    <td><?= htmlspecialchars($row['name']) ?></td>
+                                    <td><?= htmlspecialchars($row['email']) ?></td>
+                                    <td><?= htmlspecialchars($row['destination']) ?></td>
+                                    <td>₹<?= number_format($row['fees']) ?></td>
+                                    <td>
+                                        <span class="badge bg-<?= $row['status'] == 'paid' ? 'success' : 'warning' ?>">
+                                            <?= htmlspecialchars($row['status']) ?>
+                                        </span>
+                                    </td>
+                                    <td><?= date('Y-m-d H:i:s', strtotime($row['added_date'])) ?></td> <!-- Added Date column data -->
+                                    <td>
+                                        <a href="delete_registration.php?id=<?= $row['id'] ?>" 
+                                           onclick="return confirm('Are you sure you want to delete this registration?')" 
+                                           class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php 
+                            $n = $n + 1;
+                            endwhile; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
         </div>
+    </div>
+</div>
 
         <!-- Users Modal -->
         <div class="modal fade" id="usersModal" tabindex="-1" aria-labelledby="usersModalLabel" aria-hidden="true">
@@ -415,5 +490,49 @@ $total_fees = $conn->query("SELECT SUM(fees) as total FROM registration")->fetch
             }
         });
     </script>
+    <script>
+    // Registration Fees Chart
+    const ctx = document.getElementById('feesChart').getContext('2d');
+    const feesChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: <?php echo json_encode($labels); ?>,
+            datasets: [{
+                label: 'Daily Fees Collected (₹)',
+                data: <?php echo json_encode($data); ?>,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '₹' + context.raw.toLocaleString();
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
 </body>
 </html>
