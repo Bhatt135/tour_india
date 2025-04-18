@@ -38,7 +38,7 @@
 
     <!-- Header Section -->
     <div class="main-content">
-        <header id="daman_details">
+        <header id="goa_details">
             <div class="header-content">
                 <h1>Goa : filled with refreshment</h1>
                 <div class="line"></div>
